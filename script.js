@@ -77,6 +77,8 @@ const PAGE_CONTENT = {
    ======================================== */
 const state = {
   currentFilter: 'all',
+  searchQuery: '',
+  sortOrder: 'default', // 'default' | 'asc' | 'desc'
   menuOpen: false,
   cartOpen: false,
   modalOpen: false,
@@ -145,29 +147,53 @@ function createProductCard(product) {
   return clone;
 }
 
-function renderProductGrid(filter = 'all') {
-  const filtered = filter === 'all'
-    ? PRODUCTS
+function renderProductGrid() {
+  const filter = state.currentFilter;
+  const query = state.searchQuery.trim().toLowerCase();
+  const sort = state.sortOrder;
+
+  // 1. Filter by tag
+  let results = filter === 'all'
+    ? [...PRODUCTS]
     : PRODUCTS.filter(p => p.tag.toLowerCase() === filter.toLowerCase());
+
+  // 2. Filter by search keyword
+  if (query) {
+    results = results.filter(p => p.title.toLowerCase().includes(query));
+  }
+
+  // 3. Sort
+  if (sort === 'asc') {
+    results.sort((a, b) => parseFloat(a.price.replace('$', '')) - parseFloat(b.price.replace('$', '')));
+  } else if (sort === 'desc') {
+    results.sort((a, b) => parseFloat(b.price.replace('$', '')) - parseFloat(a.price.replace('$', '')));
+  }
+  // 'default' — original order
+
   DOM.grid.innerHTML = '';
 
-  if (filtered.length === 0) {
+  if (results.length === 0) {
+    const isSearching = query !== '';
     DOM.grid.innerHTML = `
       <div class="products__empty">
-        <div class="products__empty-icon">🔍</div>
-        <p class="products__empty-text">该分类暂无商品</p>
-        <button class="products__empty-reset" id="empty-reset-btn">查看全部商品</button>
+        <div class="products__empty-icon">${isSearching ? '🔍' : '📭'}</div>
+        <p class="products__empty-text">${isSearching ? `未找到与「${state.searchQuery}」相关的商品` : '该分类暂无商品'}</p>
+        <button class="products__empty-reset" id="empty-reset-btn">${isSearching ? '清除搜索' : '查看全部商品'}</button>
       </div>`;
     $('#empty-reset-btn').addEventListener('click', () => {
-      renderProductGrid('all');
-      updateFilterButtons('all');
+      if (isSearching) {
+        $('#search-input').value = '';
+        state.searchQuery = '';
+      }
       state.currentFilter = 'all';
+      updateFilterButtons('all');
+      renderProductGrid();
     });
     return;
   }
 
   const fragment = document.createDocumentFragment();
-  filtered.forEach(p => fragment.appendChild(createProductCard(p)));
+  results.forEach(p => fragment.appendChild(createProductCard(p)));
   DOM.grid.appendChild(fragment);
 }
 
@@ -184,8 +210,36 @@ function setupFilters() {
   $$('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       state.currentFilter = btn.dataset.filter;
-      renderProductGrid(btn.dataset.filter);
+      renderProductGrid();
       updateFilterButtons(btn.dataset.filter);
+    });
+  });
+}
+
+/* ========================================
+   Search & Sort
+   ======================================== */
+function setupSearch() {
+  const input = $('#search-input');
+  let debounceTimer;
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      state.searchQuery = input.value;
+      renderProductGrid();
+    }, 250); // 250ms debounce
+  });
+}
+
+function setupSort() {
+  const buttons = $$('.sort-btn');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.sortOrder = btn.dataset.sort;
+      buttons.forEach(b => b.classList.toggle('sort-btn--active', b.dataset.sort === state.sortOrder));
+      renderProductGrid();
     });
   });
 }
@@ -586,8 +640,10 @@ function setupActiveNavOnScroll() {
    Init
    ======================================== */
 function init() {
-  renderProductGrid('all');
+  renderProductGrid();
   setupFilters();
+  setupSearch();
+  setupSort();
   setupAddToCart();
   setupCartToggle();
   setupCartEvents();

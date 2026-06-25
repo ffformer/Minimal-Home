@@ -532,6 +532,89 @@ input[type="checkbox"] {
   margin-bottom: var(--space-lg);
 }
 
+/* — Toolbar: Search + Sort — */
+.products__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  align-items: center;
+}
+
+.products__search {
+  flex: 1;
+  min-width: 180px;
+  position: relative;
+}
+
+.products__search-icon {
+  position: absolute;
+  left: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.products__search-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) + 18px + var(--space-sm));
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  min-height: 40px;
+}
+
+.products__search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.products__search-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(184, 117, 62, 0.12);
+}
+
+/* Clear search button (webkit) */
+.products__search-input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.products__sort {
+  display: flex;
+  gap: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+
+.sort-btn {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border-radius: var(--radius-full);
+  border: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  min-width: 52px;
+}
+
+.sort-btn:hover {
+  color: var(--color-text);
+}
+
+.sort-btn--active {
+  background: var(--color-surface);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
 /* — Filter Bar — */
 .products__filters {
   display: flex;
@@ -1359,6 +1442,11 @@ input[type="checkbox"] {
 
   .products { padding: var(--space-2xl) var(--space-xl); }
   .products__heading { font-size: var(--font-size-2xl); }
+  .products__toolbar { gap: var(--space-lg); }
+  .products__search { min-width: 220px; }
+  .products__search-input { min-height: 44px; font-size: var(--font-size-base); }
+  .sort-btn { font-size: var(--font-size-sm); padding: var(--space-sm) var(--space-lg); }
+
   .products__filters { margin-bottom: var(--space-xl); }
   .filter-btn { padding: var(--space-sm) var(--space-lg); font-size: var(--font-size-sm); min-width: 64px; }
 
